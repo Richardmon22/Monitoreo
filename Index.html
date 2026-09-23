@@ -1,0 +1,1070 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <base target="_top">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Monitoreo TI · Sofitasa</title>
+  <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+
+  <style>
+    :root{
+      --primary:#4099ff; --primary-dark:#2d7fd6;
+      --success:#2ed8b6; --warning:#ffb64d; --danger:#ff5370;
+      --purple:#c65cf1;
+      --bg:#f6f7fb; --text:#404e67; --muted:#9aa0ac; --border:#eef1f7;
+      --sidebar-bg:#2c3e50; --sidebar-2:#1f2d3d; --sidebar-fg:#b8c7ce;
+      --shadow:0 1px 20px 0 rgba(69,90,100,.08);
+      --radius:8px;
+    }
+    *{box-sizing:border-box;margin:0;padding:0}
+    html,body{background:var(--bg);color:var(--text);font-family:'Open Sans',system-ui,sans-serif;font-size:14px}
+    button{font-family:inherit;cursor:pointer;border:none;background:none}
+    a{text-decoration:none;color:inherit}
+    .hidden{display:none!important}
+
+    /* Sidebar */
+    .pc-sidebar{position:fixed;top:0;left:0;bottom:0;width:250px;
+      background:linear-gradient(180deg,var(--sidebar-bg),var(--sidebar-2));
+      color:#ecf0f1;overflow-y:auto;z-index:200;transition:transform .25s}
+    .pc-sidebar .brand{display:flex;align-items:center;gap:8px;padding:22px 22px 18px;
+      font-size:19px;font-weight:700;border-bottom:1px solid rgba(255,255,255,.06)}
+    .pc-sidebar .brand .logo-mark{color:var(--primary);font-size:22px}
+    .pc-sidebar .brand small{opacity:.55;font-weight:400;font-size:11.5px;margin-left:2px}
+    .pc-sidebar .nav-group-title{padding:16px 22px 8px;font-size:10.5px;font-weight:700;
+      text-transform:uppercase;letter-spacing:1.2px;color:#7d8a99}
+    .pc-sidebar ul{list-style:none}
+    .pc-sidebar li a{display:flex;align-items:center;gap:12px;padding:11px 22px;
+      color:var(--sidebar-fg);font-size:13.5px;font-weight:500;
+      border-left:3px solid transparent;transition:.15s;cursor:pointer}
+    .pc-sidebar li a:hover{background:rgba(255,255,255,.05);color:#fff}
+    .pc-sidebar li.active a{background:rgba(64,153,255,.14);color:var(--primary);
+      border-left-color:var(--primary)}
+    .pc-sidebar .nav-ico{font-size:15px;width:22px;text-align:center}
+
+    /* Content */
+    .pc-content{margin-left:250px;min-height:100vh;transition:margin .25s}
+    .pc-header{position:sticky;top:0;z-index:100;height:64px;padding:0 28px;
+      background:#fff;display:flex;align-items:center;gap:18px;border-bottom:1px solid var(--border)}
+    .hamburger{display:none;font-size:22px;padding:6px 10px;color:var(--text);border-radius:6px}
+    .hamburger:hover{background:var(--bg)}
+    .pc-search{flex:1;max-width:520px;display:flex;align-items:center;gap:10px;
+      background:var(--bg);border-radius:22px;padding:9px 16px}
+    .pc-search input{flex:1;border:none;background:transparent;outline:none;font-size:14px;color:var(--text)}
+    .pc-header-right{margin-left:auto;display:flex;align-items:center;gap:10px}
+    .icon-btn{position:relative;width:40px;height:40px;border-radius:50%;background:var(--bg);
+      font-size:16px;display:flex;align-items:center;justify-content:center}
+    .icon-btn .badge{position:absolute;top:-2px;right:-2px;background:var(--danger);color:#fff;
+      font-size:10px;font-weight:700;padding:2px 6px;border-radius:10px}
+    .user-chip{display:flex;align-items:center;gap:10px;padding-left:6px}
+    .user-chip img{width:38px;height:38px;border-radius:50%;object-fit:cover}
+    .user-info{display:flex;flex-direction:column;line-height:1.2}
+    .user-name{font-weight:600;font-size:13px}
+    .user-role{font-size:11px;color:var(--muted)}
+
+    .pc-main{padding:24px 28px}
+    .page-header{display:flex;align-items:baseline;gap:14px;margin-bottom:20px}
+    .page-header h1{font-size:20px;font-weight:600;padding-left:12px;border-left:4px solid var(--primary)}
+    .page-header .crumb{margin-left:auto;color:var(--muted);font-size:11.5px;letter-spacing:.6px;text-transform:uppercase}
+    .page-header .last-update{color:var(--muted);font-size:12px}
+
+    /* ============ FILTER BAR ============ */
+    .filter-bar{background:#fff;border-radius:var(--radius);box-shadow:var(--shadow);
+      padding:14px 20px;margin-bottom:20px;display:flex;flex-wrap:wrap;align-items:center;gap:12px}
+    .filter-bar-label{font-size:11.5px;font-weight:700;color:var(--muted);
+      text-transform:uppercase;letter-spacing:.6px}
+    .filter-segment{display:flex;gap:4px;background:var(--bg);padding:4px;border-radius:22px}
+    .filter-segment button{padding:6px 16px;border-radius:18px;font-size:12.5px;font-weight:600;
+      color:var(--muted);background:transparent;transition:.15s;display:flex;align-items:center;gap:5px}
+    .filter-segment button:hover{color:var(--primary)}
+    .filter-segment button.active{background:var(--primary);color:#fff;
+      box-shadow:0 2px 8px rgba(64,153,255,.35)}
+    .filter-inputs{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+    .filter-inputs input,.filter-inputs select{
+      padding:7px 11px;border:1px solid var(--border);border-radius:6px;
+      font-size:13px;font-family:inherit;color:var(--text);outline:none;
+      background:#fafbfd;transition:.15s}
+    .filter-inputs input:focus,.filter-inputs select:focus{
+      border-color:var(--primary);background:#fff;box-shadow:0 0 0 3px rgba(64,153,255,.12)}
+    .btn-clear{margin-left:auto;padding:8px 16px;border-radius:20px;
+      background:#ffe8ee;color:var(--danger);font-size:12.5px;font-weight:600;
+      display:flex;align-items:center;gap:6px;transition:.15s}
+    .btn-clear:hover{background:#ffd6e0}
+    .btn-clear:disabled{opacity:.45;cursor:not-allowed}
+    .filter-badge{display:inline-block;padding:3px 10px;background:#e6f0ff;color:var(--primary);
+      border-radius:10px;font-size:11px;font-weight:700;margin-left:4px}
+
+    /* ============ KPI cards ============ */
+    .kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:16px;margin-bottom:20px}
+    .kpi{background:#fff;border-radius:var(--radius);box-shadow:var(--shadow);padding:18px 20px;
+      display:flex;flex-direction:column;gap:4px;position:relative;overflow:hidden}
+    .kpi::after{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--primary)}
+    .kpi.success::after{background:var(--success)}
+    .kpi.danger::after{background:var(--danger)}
+    .kpi.warning::after{background:var(--warning)}
+    .kpi.purple::after{background:var(--purple)}
+    .kpi .kpi-label{font-size:11.5px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.5px}
+    .kpi .kpi-value{font-size:24px;font-weight:700;color:var(--text)}
+    .kpi .kpi-ico{position:absolute;top:14px;right:16px;font-size:22px;opacity:.2}
+
+    /* Charts */
+    .chart-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(380px,1fr));gap:20px;margin-bottom:20px}
+    .chart-card{background:#fff;border-radius:var(--radius);box-shadow:var(--shadow);
+      padding:20px;display:flex;flex-direction:column}
+    .chart-card h3{font-size:14px;font-weight:600;margin-bottom:10px}
+    .chart-wrap{position:relative;width:100%;height:260px}
+
+    /* Table */
+    .table-card{background:#fff;border-radius:var(--radius);box-shadow:var(--shadow);padding:20px;margin-bottom:20px}
+    .table-scroll{overflow-x:auto;margin-top:6px}
+    table.data{width:100%;border-collapse:collapse;font-size:12.5px;white-space:nowrap}
+    table.data th,table.data td{padding:10px 12px;text-align:left;border-bottom:1px solid var(--border)}
+    table.data th{font-weight:600;font-size:11px;text-transform:uppercase;letter-spacing:.4px;color:var(--muted);background:#fafbfd}
+    table.data tr:hover td{background:#f9fbfe}
+    .num{text-align:right;font-variant-numeric:tabular-nums}
+
+    .pill{display:inline-block;padding:3px 10px;border-radius:12px;font-size:11px;font-weight:600}
+    .pill.ok{background:#e2fbf3;color:var(--success)}
+    .pill.warn{background:#fff5e4;color:var(--warning)}
+    .pill.bad{background:#ffe8ee;color:var(--danger)}
+
+    .loader{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:80px;gap:16px;color:var(--muted)}
+    .spinner{width:42px;height:42px;border-radius:50%;border:3px solid #e6f0ff;border-top-color:var(--primary);animation:spin 1s linear infinite}
+    @keyframes spin{to{transform:rotate(360deg)}}
+    .err{color:var(--danger);padding:20px;font-weight:600}
+
+    /* Empty state */
+    .filter-empty{background:#fff;border-radius:var(--radius);box-shadow:var(--shadow);
+      padding:60px 20px;text-align:center;color:var(--muted)}
+    .filter-empty .ico{font-size:44px;opacity:.35;margin-bottom:12px}
+    .filter-empty p{font-size:14px;margin-bottom:6px}
+    .filter-empty small{font-size:12px;opacity:.75}
+
+    /* Dashboard cards */
+    .dash-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:20px}
+    .dash-card{background:#fff;border-radius:var(--radius);box-shadow:var(--shadow);
+      padding:22px;display:flex;flex-direction:column;gap:8px;cursor:pointer;
+      transition:transform .2s,box-shadow .2s;position:relative;overflow:hidden}
+    .dash-card:hover{transform:translateY(-3px);box-shadow:0 8px 28px rgba(64,153,255,.15)}
+    .dash-card .dash-ico{width:48px;height:48px;border-radius:12px;display:flex;
+      align-items:center;justify-content:center;font-size:22px;background:#e6f0ff;color:var(--primary)}
+    .dash-card h2{font-size:26px;font-weight:700}
+    .dash-card p{color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:.5px}
+    .dash-card .arrow{position:absolute;top:22px;right:22px;color:var(--muted);font-size:18px}
+
+    /* Observaciones */
+    .obs-list{display:grid;gap:16px}
+    .obs-card{background:#fff;border-radius:var(--radius);box-shadow:var(--shadow);
+      padding:20px;border-left:4px solid var(--primary)}
+    .obs-card h4{font-size:14px;margin-bottom:10px;color:var(--primary)}
+    .obs-card pre{font-family:inherit;white-space:pre-wrap;word-wrap:break-word;
+      font-size:13px;line-height:1.55;color:var(--text)}
+
+    @media(max-width:1024px){.chart-grid{grid-template-columns:1fr}}
+    @media(max-width:860px){
+      .pc-sidebar{transform:translateX(-100%)}
+      .pc-sidebar.open{transform:translateX(0)}
+      .pc-content{margin-left:0}
+      .hamburger{display:inline-flex}
+      .pc-main{padding:16px}
+      .pc-header{padding:0 14px}
+      .pc-search{max-width:none}
+      .user-info{display:none}
+      .filter-bar{padding:12px 14px}
+      .filter-inputs{width:100%}
+    }
+  </style>
+</head>
+<body>
+
+<!-- ============ SIDEBAR ============ -->
+<aside class="pc-sidebar" id="pcSidebar">
+  <div class="brand">
+    <span class="logo-mark">✦</span> <b>Monitoreo de Servcios TI</b><small> Gerencia de Continuidad y Cumplimiento</small>
+  </div>
+  <nav id="navContainer"></nav>
+</aside>
+
+<!-- ============ CONTENT ============ -->
+<div class="pc-content">
+  <header class="pc-header">
+    <button class="hamburger" id="btnMenu" type="button">☰</button>
+    <div class="pc-search">
+      <span>🔍</span>
+      <input type="text" placeholder="Buscar...">
+    </div>
+    <div class="pc-header-right">
+      <div class="user-chip">
+        <div class="user-info">
+          <span class="user-name">Monitoreo de Servicios TI</span>
+          <span class="user-role">Operador</span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="pc-main">
+    <div class="page-header">
+      <h1 id="pageTitle">Cargando…</h1>
+      <span class="last-update" id="lastUpdate">—</span>
+      <span class="crumb" id="pageCrumb">INICIO</span>
+    </div>
+
+    <div id="filterBarContainer"></div>
+    <div id="viewContainer"></div>
+  </main>
+</div>
+
+<!-- ============ SCRIPT ÚNICO ============ -->
+<script>
+/* ============================================================
+   1. CONFIGURACIÓN
+   ============================================================ */
+const NAV = [
+  { id:'dashboard',          label:'Dashboard',           icon:'📊', group:'General', title:'Dashboard General',       crumb:'INICIO / DASHBOARD' },
+  { id:'pos-propios',        label:'POS Propios',         icon:'💳', group:'Canales', title:'POS Propios · Sofitasa',  crumb:'INICIO / CANALES / POS PROPIOS' },
+  { id:'pos-otros',          label:'POS Otros Bancos',    icon:'🏦', group:'Canales', title:'POS Otros Bancos',        crumb:'INICIO / CANALES / POS OTROS' },
+  { id:'p2p',                label:'P2P',                 icon:'🔁', group:'Canales', title:'P2P',                     crumb:'INICIO / CANALES / P2P' },
+  { id:'transferencias',     label:'Transferencias',      icon:'📤', group:'Canales', title:'Transferencias',          crumb:'INICIO / CANALES / TRANSFERENCIAS' },
+  { id:'credito-inmediato',  label:'Crédito Inmediato',   icon:'⚡', group:'Canales', title:'Crédito Inmediato',       crumb:'INICIO / CANALES / CRÉDITO INM.' },
+  { id:'debito-inmediato',   label:'Débito Inmediato',    icon:'💠', group:'Canales', title:'Débito Inmediato',        crumb:'INICIO / CANALES / DÉBITO INM.' },
+  { id:'estadistica-diaria', label:'Estadística Diaria',  icon:'📝', group:'Reportes', title:'Estadística Diaria',     crumb:'INICIO / REPORTES / DIARIA' },
+  { id:'est-semanales',      label:'Estadística Semanal', icon:'📆', group:'Reportes', title:'Estadística Semanal',    crumb:'INICIO / REPORTES / SEMANAL' },
+  { id:'est-trimestrales',   label:'Estadística Mensual', icon:'🗓', group:'Reportes', title:'Estadística Mensual',    crumb:'INICIO / REPORTES / MENSUAL' }
+];
+
+/* Páginas que admiten filtro temporal */
+const FILTERED_PAGES = new Set([
+  'pos-propios','pos-otros','p2p','transferencias','credito-inmediato','debito-inmediato'
+]);
+
+/* ============================================================
+   2. HELPERS
+   ============================================================ */
+const $  = s => document.querySelector(s);
+const $$ = s => document.querySelectorAll(s);
+const fmtInt = n => (n||0).toLocaleString('es-VE');
+const fmtPct = n => ((n||0)*100).toFixed(2)+'%';
+const fmtNum = (n, d) => (n||0).toFixed(d===undefined?2:d);
+const esc = s => String(s||'').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+/* Convierte 'dd/MM' (asumimos 2026) a Date */
+function toDateObj(fecha) {
+  const m = String(fecha || '').match(/^(\d{1,2})\/(\d{1,2})$/);
+  if (!m) return null;
+  return new Date(2026, Number(m[2]) - 1, Number(m[1]));
+}
+
+/* ============================================================
+   3. ESTADO GLOBAL
+   ============================================================ */
+let CURRENT_PAGE = 'dashboard';
+let RAW_DATA = null;   // { rows, kpi } de la página actual
+let areaChartRef = null;
+let barChartRef = null;
+
+const FILTER_STATE = {
+  type: 'all',    // 'all' | 'day' | 'month' | 'quarter'
+  day: '',        // 'YYYY-MM-DD'
+  month: '',      // 'YYYY-MM'
+  quarter: ''     // 'YYYY-Q'
+};
+
+/* ============================================================
+   4. RENDER SIDEBAR
+   ============================================================ */
+function renderSidebar() {
+  const cont = $('#navContainer');
+  let currentGroup = '';
+  let html = '';
+  NAV.forEach(item => {
+    if (item.group !== currentGroup) {
+      if (currentGroup) html += '</ul>';
+      currentGroup = item.group;
+      html += `<div class="nav-group-title">${item.group}</div><ul>`;
+    }
+    html += `<li data-page="${item.id}">
+      <a href="javascript:void(0)" data-page="${item.id}" class="nav-link">
+        <span class="nav-ico">${item.icon}</span>
+        <span>${item.label}</span>
+      </a>
+    </li>`;
+  });
+  if (currentGroup) html += '</ul>';
+  cont.innerHTML = html;
+
+  cont.querySelectorAll('.nav-link').forEach(a => {
+    a.addEventListener('click', function(e) {
+      e.preventDefault();
+      navigateTo(this.dataset.page);
+    });
+  });
+}
+
+/* ============================================================
+   5. NAVEGACIÓN
+   ============================================================ */
+function navigateTo(pageId) {
+  CURRENT_PAGE = pageId;
+  // Resetear filtros al cambiar de página
+  FILTER_STATE.type = 'all';
+  FILTER_STATE.day = '';
+  FILTER_STATE.month = '';
+  FILTER_STATE.quarter = '';
+  RAW_DATA = null;
+  areaChartRef = null;
+  barChartRef = null;
+
+  $$('#navContainer li').forEach(li => {
+    li.classList.toggle('active', li.dataset.page === pageId);
+  });
+  $('#pcSidebar').classList.remove('open');
+  renderPage(pageId);
+}
+
+/* ============================================================
+   6. RENDER DE PÁGINA (carga datos)
+   ============================================================ */
+function renderPage(pageId) {
+  const meta = NAV.find(n => n.id === pageId) || NAV[0];
+  $('#pageTitle').textContent = meta.title;
+  $('#pageCrumb').textContent = meta.crumb;
+  $('#filterBarContainer').innerHTML = '';   // limpia filtros previos
+  $('#viewContainer').innerHTML = `<div class="loader"><div class="spinner"></div><p>Cargando…</p></div>`;
+
+  if (pageId === 'dashboard') {
+    google.script.run
+      .withSuccessHandler(renderDashboard)
+      .withFailureHandler(renderError)
+      .getDashboardData();
+  } else {
+    google.script.run
+      .withSuccessHandler(resp => renderGeneric(pageId, resp))
+      .withFailureHandler(renderError)
+      .getPageData(pageId);
+  }
+}
+
+function renderError(err) {
+  $('#viewContainer').innerHTML = '<p class="err">Error: ' + esc(err.message) + '</p>';
+}
+
+/* ============================================================
+   7. VISTA DASHBOARD (sin filtros)
+   ============================================================ */
+function renderDashboard(resp) {
+  if (!resp.ok) { renderError({ message: resp.error }); return; }
+  const d = resp.data;
+  const cards = [
+    { id:'pos-propios',    label:'POS Propios',      kpi:d.posPropios,     ico:'💳' },
+    { id:'pos-otros',      label:'POS Otros Bancos', kpi:d.posOtros,       ico:'🏦' },
+    { id:'p2p',            label:'P2P',              kpi:d.p2p,            ico:'🔁' },
+    { id:'transferencias', label:'Transferencias',   kpi:d.transferencias, ico:'📤' }
+  ];
+
+  $('#viewContainer').innerHTML = `
+    <div class="dash-grid">
+      ${cards.map(c => {
+        const k = c.kpi || {};
+        return `<a class="dash-card" data-page="${c.id}" href="javascript:void(0)">
+          <div class="dash-ico">${c.ico}</div>
+          <p>${esc(c.label)}</p>
+          <h2>${fmtPct(k.tasaAprob)}</h2>
+          <small style="color:#9aa0ac">${fmtInt(k.total)} ops · ${fmtInt(k.rech)} rech.</small>
+          <span class="arrow">›</span>
+        </a>`;
+      }).join('')}
+    </div>
+    <div class="chart-card" style="margin-top:22px">
+      <h3>Evolución · POS Propios (Tasa de aprobación %)</h3>
+      <div class="chart-wrap"><canvas id="chartGlobal"></canvas></div>
+    </div>
+  `;
+
+  $('#viewContainer').querySelectorAll('.dash-card').forEach(el => {
+    el.addEventListener('click', () => navigateTo(el.dataset.page));
+  });
+
+  const labels = (d.posRows || []).map(r => r.fecha);
+  const data = (d.posRows || []).map(r => +(r.tasaAprob * 100).toFixed(2));
+  if (labels.length) {
+    new Chart($('#chartGlobal'), {
+      type: 'line',
+      data: { labels, datasets: [{
+        data, borderColor:'#4099ff',
+        backgroundColor: 'rgba(64,153,255,0.15)',
+        fill:true, tension:.35, pointRadius:2, borderWidth:2
+      }]},
+      options: { responsive:true, maintainAspectRatio:false,
+        plugins:{legend:{display:false}},
+        scales:{
+          y:{beginAtZero:true, grid:{color:'#eef1f7'}, ticks:{color:'#9aa0ac'}},
+          x:{grid:{display:false}, ticks:{color:'#9aa0ac'}}
+        }
+      }
+    });
+  }
+  $('#lastUpdate').textContent = 'Actualizado: ' + new Date().toLocaleTimeString('es-VE');
+}
+
+/* ============================================================
+   8. VISTA GENÉRICA (con filtros)
+   ============================================================ */
+function renderGeneric(pageId, resp) {
+  if (!resp.ok) { renderError({ message: resp.error }); return; }
+
+  if (pageId === 'estadistica-diaria') { renderEstDiaria(resp.data); return; }
+  if (pageId === 'est-semanales')      { renderEstSemanal(resp.data); return; }
+  if (pageId === 'est-trimestrales')   { renderEstTrimestral(resp.data); return; }
+
+  // Guardamos datos crudos
+  RAW_DATA = resp.data;
+
+  // Pinta barra de filtros y cuerpo
+  renderFilterBar();
+  renderGenericBody();
+}
+
+/* ============================================================
+   9. BARRA DE FILTROS
+   ============================================================ */
+function renderFilterBar() {
+  const cont = $('#filterBarContainer');
+
+  if (!FILTERED_PAGES.has(CURRENT_PAGE)) {
+    cont.innerHTML = '';
+    return;
+  }
+
+  const f = FILTER_STATE;
+  const hasFilter = f.type !== 'all';
+
+  // Conteo tras aplicar filtro
+  const totalDias = RAW_DATA && RAW_DATA.rows ? RAW_DATA.rows.length : 0;
+  const visibles  = RAW_DATA ? applyFilter(RAW_DATA.rows).length : 0;
+
+  cont.innerHTML = `
+    <div class="filter-bar">
+      <span class="filter-bar-label">🔎 Filtrar:</span>
+
+      <div class="filter-segment">
+        <button data-type="all"     class="${f.type==='all'?'active':''}">Todo</button>
+        <button data-type="day"     class="${f.type==='day'?'active':''}">Día</button>
+        <button data-type="month"   class="${f.type==='month'?'active':''}">Mes</button>
+        <button data-type="quarter" class="${f.type==='quarter'?'active':''}">Trimestre</button>
+      </div>
+
+      <div class="filter-inputs" id="filterInputs">
+        ${renderFilterInputsHTML()}
+      </div>
+
+      ${hasFilter ? `<span class="filter-badge">${visibles} / ${totalDias} días</span>` : ''}
+
+      <button class="btn-clear" id="btnClearFilter" ${hasFilter?'':'disabled'}>
+        🗑 Limpiar
+      </button>
+    </div>
+  `;
+
+  // Segment buttons
+  cont.querySelectorAll('.filter-segment button').forEach(b => {
+    b.addEventListener('click', () => {
+      FILTER_STATE.type = b.dataset.type;
+      if (b.dataset.type === 'day' && !FILTER_STATE.day) {
+        FILTER_STATE.day = '2026-09-01';
+      }
+      if (b.dataset.type === 'month' && !FILTER_STATE.month) {
+        FILTER_STATE.month = '2026-09';
+      }
+      if (b.dataset.type === 'quarter' && !FILTER_STATE.quarter) {
+        FILTER_STATE.quarter = '2026-Q3';
+      }
+      renderFilterBar();
+      renderGenericBody();
+    });
+  });
+
+  // Clear button
+  const clr = $('#btnClearFilter');
+  if (clr) clr.addEventListener('click', clearFilter);
+
+  // Inputs
+  wireFilterInputs();
+}
+
+function renderFilterInputsHTML() {
+  const f = FILTER_STATE;
+  if (f.type === 'day') {
+    return `<input type="date" id="filterDayInput"
+      value="${f.day || '2026-09-01'}"
+      min="2026-09-01" max="2026-09-30">`;
+  }
+  if (f.type === 'month') {
+    return `<input type="month" id="filterMonthInput"
+      value="${f.month || '2026-09'}"
+      min="2026-01" max="2026-12">`;
+  }
+  if (f.type === 'quarter') {
+    const cur = f.quarter || '2026-Q3';
+    const [yy, qq] = cur.split('-Q');
+    return `
+      <select id="filterQuarterYear">
+        <option value="2026" ${yy==='2026'?'selected':''}>2026</option>
+      </select>
+      <select id="filterQuarterQ">
+        <option value="1" ${qq==='1'?'selected':''}>Q1 (Ene–Mar)</option>
+        <option value="2" ${qq==='2'?'selected':''}>Q2 (Abr–Jun)</option>
+        <option value="3" ${qq==='3'?'selected':''}>Q3 (Jul–Sep)</option>
+        <option value="4" ${qq==='4'?'selected':''}>Q4 (Oct–Dic)</option>
+      </select>`;
+  }
+  return '';
+}
+
+function wireFilterInputs() {
+  const f = FILTER_STATE;
+
+  const d = $('#filterDayInput');
+  if (d) d.addEventListener('change', () => {
+    f.day = d.value;
+    refreshFilterAndBody();
+  });
+
+  const m = $('#filterMonthInput');
+  if (m) m.addEventListener('change', () => {
+    f.month = m.value;
+    refreshFilterAndBody();
+  });
+
+  const qy = $('#filterQuarterYear');
+  const qq = $('#filterQuarterQ');
+  const updQ = () => {
+    if (qy && qq) {
+      f.quarter = qy.value + '-Q' + qq.value;
+      refreshFilterAndBody();
+    }
+  };
+  if (qy) qy.addEventListener('change', updQ);
+  if (qq) qq.addEventListener('change', updQ);
+}
+
+/* Refresca solo el body (sin tocar los inputs) */
+function refreshFilterAndBody() {
+  // Actualiza el badge (contador) sin re-renderizar el filtro completo
+  const cont = $('#filterBarContainer');
+  if (cont) {
+    const badge = cont.querySelector('.filter-badge');
+    const hasFilter = FILTER_STATE.type !== 'all';
+    const totalDias = RAW_DATA && RAW_DATA.rows ? RAW_DATA.rows.length : 0;
+    const visibles  = RAW_DATA ? applyFilter(RAW_DATA.rows).length : 0;
+    if (hasFilter && badge) {
+      badge.textContent = `${visibles} / ${totalDias} días`;
+    } else if (hasFilter && !badge) {
+      // Insertar badge después de .filter-inputs
+      const inputs = cont.querySelector('#filterInputs');
+      if (inputs) {
+        const sp = document.createElement('span');
+        sp.className = 'filter-badge';
+        sp.textContent = `${visibles} / ${totalDias} días`;
+        inputs.insertAdjacentElement('afterend', sp);
+      }
+    }
+    // Habilitar botón clear
+    const clr = $('#btnClearFilter');
+    if (clr) clr.disabled = !hasFilter;
+  }
+  renderGenericBody();
+}
+
+function clearFilter() {
+  FILTER_STATE.type = 'all';
+  FILTER_STATE.day = '';
+  FILTER_STATE.month = '';
+  FILTER_STATE.quarter = '';
+  renderFilterBar();
+  renderGenericBody();
+}
+
+/* ============================================================
+   10. FILTRADO
+   ============================================================ */
+function applyFilter(rows) {
+  if (!rows) return [];
+  const f = FILTER_STATE;
+  if (f.type === 'all') return rows;
+
+  if (f.type === 'day' && f.day) {
+    const [yy, mm, dd] = f.day.split('-');
+    const target = `${dd}/${mm}`;
+    return rows.filter(r => r.fecha === target);
+  }
+
+  if (f.type === 'month' && f.month) {
+    const [yy, mm] = f.month.split('-');
+    return rows.filter(r => {
+      const d = toDateObj(r.fecha);
+      return d && d.getFullYear() === Number(yy) && (d.getMonth() + 1) === Number(mm);
+    });
+  }
+
+  if (f.type === 'quarter' && f.quarter) {
+    const [yy, qq] = f.quarter.split('-Q');
+    const qi = Number(qq);
+    const startM = (qi - 1) * 3 + 1;
+    const endM = startM + 2;
+    return rows.filter(r => {
+      const d = toDateObj(r.fecha);
+      if (!d) return false;
+      const m = d.getMonth() + 1;
+      return d.getFullYear() === Number(yy) && m >= startM && m <= endM;
+    });
+  }
+  return rows;
+}
+
+/* ============================================================
+   11. RECALCULAR KPIs SOBRE FILAS FILTRADAS
+   ============================================================ */
+function recalcKpi(rows, original) {
+  const base = Object.assign({}, original || {});
+  if (!rows.length) {
+    return Object.assign(base, { total:0, aprob:0, rech:0, tasaAprob:0, tasaRech:0 });
+  }
+  const sum = k => rows.reduce((a, r) => a + (Number(r[k]) || 0), 0);
+  const totalField = (rows[0].emitidas !== undefined) ? 'emitidas' : 'total';
+  const total = sum(totalField);
+  const aprob = sum('aprob');
+  const rech  = sum('rech');
+  Object.assign(base, {
+    total, aprob, rech,
+    tasaAprob: total ? aprob/total : 0,
+    tasaRech:  total ? rech/total  : 0
+  });
+  // P2P extras
+  if (rows[0].sofnet !== undefined) {
+    base.sofnet   = sum('sofnet');
+    base.appMovil = sum('appMovil');
+    const t = base.sofnet + base.appMovil;
+    base.usoApp    = t ? base.appMovil / t : 0;
+    base.usoSofnet = t ? base.sofnet  / t : 0;
+  }
+  return base;
+}
+
+/* ============================================================
+   12. RENDER CUERPO GENÉRICO
+   ============================================================ */
+function renderGenericBody() {
+  if (!RAW_DATA) return;
+  const cfg = PAGES_CFG[CURRENT_PAGE];
+  if (!cfg) { $('#viewContainer').innerHTML = '<p class="err">Configuración no encontrada.</p>'; return; }
+
+  const rows = applyFilter(RAW_DATA.rows || []);
+  const kpi  = recalcKpi(rows, RAW_DATA.kpi);
+
+  // Destruir gráficos previos
+  if (areaChartRef) { areaChartRef.destroy(); areaChartRef = null; }
+  if (barChartRef)  { barChartRef.destroy();  barChartRef  = null; }
+
+  // Empty state
+  if (!rows.length) {
+    $('#viewContainer').innerHTML = `
+      <div class="filter-empty">
+        <div class="ico">🔍</div>
+        <p><b>Sin datos para el filtro seleccionado</b></p>
+        <small>Prueba con otro rango o pulsa "🗑 Limpiar" para ver todo.</small>
+      </div>`;
+    return;
+  }
+
+  // KPI cards
+  let kpiHtml = '<div class="kpi-grid">';
+  cfg.cards.forEach(c => {
+    let val = kpi[c.key];
+    if (c.agg) val = rows.reduce((a,r) => a + (Number(r[c.agg]) || 0), 0);
+    const txt = c.type === 'pct' ? fmtPct(val) : fmtInt(val);
+    kpiHtml += `<div class="kpi ${c.cls||''}">
+      <span class="kpi-ico">${c.ico||''}</span>
+      <span class="kpi-label">${esc(c.label)}</span>
+      <span class="kpi-value">${txt}</span>
+    </div>`;
+  });
+  kpiHtml += '</div>';
+
+  // Charts
+  let chartHtml = '<div class="chart-grid">';
+  cfg.charts.forEach((ch, i) => {
+    chartHtml += `<div class="chart-card">
+      <h3>${esc(ch.title || 'Gráfico')}</h3>
+      <div class="chart-wrap"><canvas id="chart${i+1}"></canvas></div>
+    </div>`;
+  });
+  chartHtml += '</div>';
+
+  // Table
+  let tableHtml = `<div class="table-card">
+    <h3>Detalle diario ${FILTER_STATE.type!=='all' ? '<span class="filter-badge">Filtrado</span>' : ''}</h3>
+    <div class="table-scroll"><table class="data">
+      <thead><tr>${cfg.columns.map(c => `<th>${esc(c.label)}</th>`).join('')}</tr></thead>
+      <tbody>`;
+  rows.slice().reverse().forEach(r => {
+    tableHtml += '<tr>';
+    cfg.columns.forEach(c => {
+      let v = r[c.key];
+      if (c.fmt === 'pct') {
+        const raw = Number(v) || 0;
+        const pill = raw >= 0.9 ? 'ok' : raw >= 0.8 ? 'warn' : 'bad';
+        tableHtml += `<td><span class="pill ${pill}">${fmtPct(raw)}</span></td>`;
+      } else if (c.fmt === 'int') {
+        tableHtml += `<td class="num">${fmtInt(v)}</td>`;
+      } else if (c.fmt === 'num') {
+        tableHtml += `<td class="num">${fmtNum(v, c.dec||0)}</td>`;
+      } else {
+        tableHtml += `<td>${esc(v)}</td>`;
+      }
+    });
+    tableHtml += '</tr>';
+  });
+  tableHtml += '</tbody></table></div></div>';
+
+  $('#viewContainer').innerHTML = kpiHtml + chartHtml + tableHtml;
+
+  // Gráficos
+  const labels = rows.map(r => r.fecha);
+  cfg.charts.forEach((ch, i) => {
+    const canvas = document.getElementById('chart' + (i+1));
+    if (!canvas) return;
+    const data = rows.map(r => {
+      let v = Number(r[ch.field]) || 0;
+      if (ch.scale) v *= ch.scale;
+      return +v.toFixed(2);
+    });
+    const color = ch.color || '#4099ff';
+
+    if (ch.type === 'bar') {
+      barChartRef = new Chart(canvas, {
+        type:'bar',
+        data:{ labels, datasets:[{ data, backgroundColor:color, borderRadius:4 }]},
+        options:{ responsive:true, maintainAspectRatio:false,
+          plugins:{legend:{display:false}},
+          scales:{
+            y:{beginAtZero:true, grid:{color:'#eef1f7'}, ticks:{color:'#9aa0ac'}},
+            x:{grid:{display:false}, ticks:{color:'#9aa0ac'}}
+          }
+        }
+      });
+    } else {
+      const ctx = canvas.getContext('2d');
+      const grad = ctx.createLinearGradient(0,0,0,260);
+      grad.addColorStop(0, color+'66');
+      grad.addColorStop(1, color+'05');
+      areaChartRef = new Chart(canvas, {
+        type:'line',
+        data:{ labels, datasets:[{
+          data, borderColor:color, backgroundColor:grad, fill:true,
+          tension:.35, pointRadius:2, borderWidth:2
+        }]},
+        options:{ responsive:true, maintainAspectRatio:false,
+          plugins:{legend:{display:false}},
+          scales:{
+            y:{beginAtZero:true, grid:{color:'#eef1f7'}, ticks:{color:'#9aa0ac'}},
+            x:{grid:{display:false}, ticks:{color:'#9aa0ac'}}
+          }
+        }
+      });
+    }
+  });
+
+  $('#lastUpdate').textContent = 'Actualizado: ' + new Date().toLocaleTimeString('es-VE');
+}
+
+/* ============================================================
+   13. VISTAS DE REPORTES (sin filtros)
+   ============================================================ */
+function renderEstDiaria(d) {
+  const rows = d.rows || [];
+  if (!rows.length) { $('#viewContainer').innerHTML = '<p class="err">Sin registros.</p>'; return; }
+  $('#viewContainer').innerHTML = '<div class="obs-list">' + rows.map(r => `
+    <div class="obs-card">
+      <h4>${esc(r.titulo || r.estadistica || 'Registro')}</h4>
+      ${r.estadistica ? '<pre>' + esc(r.estadistica) + '</pre>' : ''}
+      ${r.observaciones ? '<pre style="border-top:1px dashed #eef1f7;margin-top:10px;padding-top:10px"><b>Observaciones:</b>\n' + esc(r.observaciones) + '</pre>' : ''}
+      ${r.cierreT1 ? '<details style="margin-top:12px"><summary style="cursor:pointer;color:#4099ff;font-weight:600">▸ Cierre T1</summary><pre style="margin-top:8px">' + esc(r.cierreT1) + '</pre></details>' : ''}
+      ${r.cierreT2 ? '<details style="margin-top:8px"><summary style="cursor:pointer;color:#4099ff;font-weight:600">▸ Cierre T2</summary><pre style="margin-top:8px">' + esc(r.cierreT2) + '</pre></details>' : ''}
+    </div>
+  `).join('') + '</div>';
+  $('#lastUpdate').textContent = 'Actualizado: ' + new Date().toLocaleTimeString('es-VE');
+}
+
+function renderEstSemanal(d) {
+  const rows = d.rows || [];
+  const fmtV = v => (typeof v === 'number' && v > 0 && v <= 1) ? fmtPct(v)
+                : (typeof v === 'number' ? fmtInt(v) : esc(v));
+  $('#viewContainer').innerHTML = `<div class="table-card">
+    <h3>KPIs por semana</h3>
+    <div class="table-scroll"><table class="data">
+      <thead><tr><th>Indicador</th><th>1-6 Sep</th><th>7-13 Sep</th><th>14-20 Sep</th><th>21-30 Sep</th><th>Total</th></tr></thead>
+      <tbody>
+        ${rows.map(r => `<tr>
+          <td style="font-weight:600">${esc(r.indicador)}</td>
+          <td class="num">${fmtV(r.s1)}</td>
+          <td class="num">${fmtV(r.s2)}</td>
+          <td class="num">${fmtV(r.s3)}</td>
+          <td class="num">${fmtV(r.s4)}</td>
+          <td class="num" style="font-weight:700">${fmtV(r.total)}</td>
+        </tr>`).join('')}
+      </tbody>
+    </table></div>
+  </div>`;
+  $('#lastUpdate').textContent = 'Actualizado: ' + new Date().toLocaleTimeString('es-VE');
+}
+
+function renderEstTrimestral(d) {
+  const m = d.matrix || [];
+  const rows = m.filter(r => r.some(c => c !== '' && c !== null && c !== undefined));
+  const maxCols = Math.max.apply(null, rows.map(r => r.length));
+  $('#viewContainer').innerHTML = `<div class="table-card">
+    <h3>Matriz mensual (Jul · Ago · Sep)</h3>
+    <div class="table-scroll"><table class="data">
+      <thead><tr>${Array.from({length:maxCols}).map((_,i) => '<th>Col ' + String.fromCharCode(65+i) + '</th>').join('')}</tr></thead>
+      <tbody>
+        ${rows.map(r => {
+          const tds = Array.from({length:maxCols}).map((_,i) => {
+            let v = r[i];
+            if (typeof v === 'number') {
+              v = (v > 0 && v <= 1) ? fmtPct(v) : (Number.isInteger(v) ? fmtInt(v) : fmtNum(v,2));
+            } else { v = esc(v); }
+            return '<td>' + v + '</td>';
+          }).join('');
+          return '<tr>' + tds + '</tr>';
+        }).join('')}
+      </tbody>
+    </table></div>
+  </div>`;
+  $('#lastUpdate').textContent = 'Actualizado: ' + new Date().toLocaleTimeString('es-VE');
+}
+
+/* ============================================================
+   14. CONFIGURACIÓN DE PÁGINAS
+   ============================================================ */
+const PAGES_CFG = {
+  'pos-propios': {
+    cards: [
+      { key:'total',     label:'Ops Totales',   type:'int', cls:'primary', ico:'📊' },
+      { key:'aprob',     label:'Aprobadas',     type:'int', cls:'success', ico:'✔' },
+      { key:'rech',      label:'Rechazadas',    type:'int', cls:'danger',  ico:'✖' },
+      { key:'tasaAprob', label:'Tasa Aprob.',   type:'pct', cls:'purple',  ico:'🎯' },
+      { agg:'claves',    label:'Claves inv.',   type:'int', cls:'warning', ico:'🔑' },
+      { agg:'cedulas',   label:'Cédulas inv.',  type:'int', cls:'warning', ico:'🆔' },
+      { agg:'fondos',    label:'Fondos insuf.', type:'int', cls:'danger',  ico:'💰' },
+      { agg:'timeout',   label:'Time Out',      type:'int', cls:'danger',  ico:'⏱' }
+    ],
+    charts: [
+      { type:'area', field:'tasaAprob', scale:100, color:'#4099ff', title:'Tasa de aprobación diaria (%)' },
+      { type:'bar',  field:'rech',                  color:'#ff5370', title:'Operaciones rechazadas' }
+    ],
+    columns: [
+      { key:'fecha',    label:'Fecha' },
+      { key:'total',    label:'Total',         fmt:'int' },
+      { key:'aprob',    label:'Aprobadas',     fmt:'int' },
+      { key:'rech',     label:'Rechazadas',    fmt:'int' },
+      { key:'tasaAprob',label:'Tasa Aprob.',   fmt:'pct' },
+      { key:'claves',   label:'Claves inv.',   fmt:'int' },
+      { key:'cedulas',  label:'Cédulas inv.',  fmt:'int' },
+      { key:'fondos',   label:'Fondos insuf.', fmt:'int' },
+      { key:'reversos', label:'Reversos',      fmt:'int' },
+      { key:'emisor',   label:'Emisor no disp.',fmt:'int' },
+      { key:'otros',    label:'Otros causales',fmt:'int' },
+      { key:'timeout',  label:'Time Out',      fmt:'int' }
+    ]
+  },
+
+  'pos-otros': {
+    cards: [
+      { key:'total',     label:'Ops Totales', type:'int', cls:'primary', ico:'📊' },
+      { key:'aprob',     label:'Aprobadas',   type:'int', cls:'success', ico:'✔' },
+      { key:'rech',      label:'Rechazadas',  type:'int', cls:'danger',  ico:'✖' },
+      { key:'tasaAprob', label:'Tasa Aprob.', type:'pct', cls:'purple',  ico:'🎯' },
+      { agg:'claves',    label:'Claves inv.', type:'int', cls:'warning', ico:'🔑' },
+      { agg:'cedulas',   label:'Cédulas inv.',type:'int', cls:'warning', ico:'🆔' },
+      { agg:'fondos',    label:'Fondos insuf.',type:'int',cls:'danger',  ico:'💰' },
+      { agg:'emisor',    label:'Emisor no disp.',type:'int',cls:'danger',ico:'📡' }
+    ],
+    charts: [
+      { type:'area', field:'tasaAprob', scale:100, color:'#4099ff', title:'Tasa de aprobación diaria (%)' },
+      { type:'bar',  field:'rech',                  color:'#ff5370', title:'Operaciones rechazadas' }
+    ],
+    columns: [
+      { key:'fecha',    label:'Fecha' },
+      { key:'total',    label:'Total',        fmt:'int' },
+      { key:'aprob',    label:'Aprobadas',    fmt:'int' },
+      { key:'rech',     label:'Rechazadas',   fmt:'int' },
+      { key:'tasaAprob',label:'Tasa Aprob.',  fmt:'pct' },
+      { key:'claves',   label:'Claves inv.',  fmt:'int' },
+      { key:'cedulas',  label:'Cédulas inv.', fmt:'int' },
+      { key:'chip',     label:'Error chip',   fmt:'int' },
+      { key:'fondos',   label:'Fondos insuf.',fmt:'int' },
+      { key:'reversos', label:'Reversos',     fmt:'int' },
+      { key:'emisor',   label:'Emisor no disp.',fmt:'int' },
+      { key:'otros',    label:'Otros causales',fmt:'int' }
+    ]
+  },
+
+  'p2p': {
+    cards: [
+      { key:'total',     label:'Transacciones', type:'int', cls:'primary', ico:'📊' },
+      { key:'aprob',     label:'Aprobadas',     type:'int', cls:'success', ico:'✔' },
+      { key:'rech',      label:'Rechazadas',    type:'int', cls:'danger',  ico:'✖' },
+      { key:'tasaAprob', label:'Tasa Aprob.',   type:'pct', cls:'purple',  ico:'🎯' },
+      { key:'usoApp',    label:'Uso App Móvil', type:'pct', cls:'warning', ico:'📱' },
+      { key:'usoSofnet', label:'Uso Sofinet',   type:'pct', cls:'warning', ico:'🔐' },
+      { agg:'sofnet',    label:'Sofinet ops',   type:'int', cls:'primary', ico:'🔐' },
+      { agg:'appMovil',  label:'App Móvil ops', type:'int', cls:'primary', ico:'📱' }
+    ],
+    charts: [
+      { type:'area', field:'tasaAprob', scale:100, color:'#4099ff', title:'Tasa de aprobación diaria (%)' },
+      { type:'bar',  field:'rech',                  color:'#ff5370', title:'Operaciones rechazadas' }
+    ],
+    columns: [
+      { key:'fecha',     label:'Fecha' },
+      { key:'total',     label:'Total',      fmt:'int' },
+      { key:'aprob',     label:'Aprobadas',  fmt:'int' },
+      { key:'rech',      label:'Rechazadas', fmt:'int' },
+      { key:'tasaAprob', label:'Tasa Aprob.',fmt:'pct' },
+      { key:'tarjetaInv',label:'Tarjeta inv.',fmt:'int' },
+      { key:'fondo',     label:'Fondo insuf.',fmt:'int' },
+      { key:'ccNoCheq',  label:'CC no cheq.',fmt:'int' },
+      { key:'tlfNoReg',  label:'Tlf no reg.',fmt:'int' },
+      { key:'errorCom',  label:'Error com.', fmt:'int' },
+      { key:'extraviada',label:'Extraviada', fmt:'int' },
+      { key:'bcoRecp',   label:'Rech. Bco.', fmt:'int' },
+      { key:'emisorInop',label:'Emisor inop.',fmt:'int' },
+      { key:'sofnet',    label:'Sofinet',    fmt:'int' },
+      { key:'appMovil',  label:'App Móvil',  fmt:'int' }
+    ]
+  },
+
+  'transferencias': {
+    cards: [
+      { key:'total',     label:'Emitidas',    type:'int', cls:'primary', ico:'📤' },
+      { key:'aprob',     label:'Aprobadas',   type:'int', cls:'success', ico:'✔' },
+      { key:'rech',      label:'Rechazadas',  type:'int', cls:'danger',  ico:'✖' },
+      { key:'tasaAprob', label:'Tasa Aprob.', type:'pct', cls:'purple',  ico:'🎯' },
+      { agg:'rechTec',   label:'Rech. técnicos',type:'int',cls:'danger', ico:'⚠' },
+      { agg:'timeout',   label:'Timeout',     type:'int', cls:'danger',  ico:'⏱' },
+      { agg:'saldoIns',  label:'Saldo insuf.',type:'int', cls:'warning', ico:'💰' },
+      { agg:'sinDesc',   label:'Sin descripción',type:'int',cls:'warning',ico:'❓' }
+    ],
+    charts: [
+      { type:'area', field:'tasaAprob', scale:100, color:'#4099ff', title:'Tasa de aprobación diaria (%)' },
+      { type:'bar',  field:'rech',                  color:'#ff5370', title:'Transferencias rechazadas' }
+    ],
+    columns: [
+      { key:'fecha',       label:'Fecha' },
+      { key:'emitidas',    label:'Emitidas',      fmt:'int' },
+      { key:'recibidas',   label:'Recibidas',     fmt:'int' },
+      { key:'aprob',       label:'Aprobadas',     fmt:'int' },
+      { key:'rech',        label:'Rechazadas',    fmt:'int' },
+      { key:'tasaAprob',   label:'Tasa Aprob.',   fmt:'pct' },
+      { key:'rechTec',     label:'Rech. técnicos',fmt:'int' },
+      { key:'cuentaCerrada',label:'Cuenta cerrada',fmt:'int' },
+      { key:'datosNo',     label:'Datos no coinc.',fmt:'int' },
+      { key:'idIncorrecto',label:'ID incorrecto', fmt:'int' },
+      { key:'sinDesc',     label:'Sin descripción',fmt:'int' },
+      { key:'timeout',     label:'Timeout',       fmt:'int' },
+      { key:'montoExcede', label:'Monto excede',  fmt:'int' },
+      { key:'saldoIns',    label:'Saldo insuf.',  fmt:'int' },
+      { key:'afilInact',   label:'Afil. inactiva',fmt:'int' },
+      { key:'noAfiliacion',label:'No afiliación', fmt:'int' }
+    ]
+  },
+
+  'credito-inmediato': {
+    cards: [
+      { key:'total',     label:'Emitidas',     type:'int', cls:'primary', ico:'📤' },
+      { key:'aprob',     label:'Aprobadas',    type:'int', cls:'success', ico:'✔' },
+      { key:'rech',      label:'Rechazadas',   type:'int', cls:'danger',  ico:'✖' },
+      { key:'tasaAprob', label:'Tasa Aprob.',  type:'pct', cls:'purple',  ico:'🎯' },
+      { agg:'rechTec',   label:'Rech. técnicos',type:'int',cls:'danger',  ico:'⚠' },
+      { agg:'timeout',   label:'Timeout',      type:'int', cls:'danger',  ico:'⏱' },
+      { agg:'saldoIns',  label:'Saldo insuf.', type:'int', cls:'warning', ico:'💰' },
+      { agg:'noAfiliacion',label:'No afiliación',type:'int',cls:'warning', ico:'🚫' }
+    ],
+    charts: [
+      { type:'area', field:'tasaAprob', scale:100, color:'#4099ff', title:'Tasa de aprobación diaria (%)' },
+      { type:'bar',  field:'rech',                  color:'#ff5370', title:'Operaciones rechazadas' }
+    ],
+    columns: [
+      { key:'fecha',       label:'Fecha' },
+      { key:'emitidas',    label:'Emitidas',      fmt:'int' },
+      { key:'recibidas',   label:'Recibidas',     fmt:'int' },
+      { key:'aprob',       label:'Aprobadas',     fmt:'int' },
+      { key:'rech',        label:'Rechazadas',    fmt:'int' },
+      { key:'tasaAprob',   label:'Tasa Aprob.',   fmt:'pct' },
+      { key:'rechTec',     label:'Rech. técnicos',fmt:'int' },
+      { key:'cuentaCerrada',label:'Cuenta cerrada',fmt:'int' },
+      { key:'datosNo',     label:'Datos no coinc.',fmt:'int' },
+      { key:'receptorOff', label:'Receptor offline',fmt:'int' },
+      { key:'idIncorrecto',label:'ID incorrecto', fmt:'int' },
+      { key:'sinDesc',     label:'Sin descripción',fmt:'int' },
+      { key:'timeout',     label:'Timeout',       fmt:'int' },
+      { key:'montoExcede', label:'Monto excede',  fmt:'int' },
+      { key:'saldoIns',    label:'Saldo insuf.',  fmt:'int' },
+      { key:'afilInact',   label:'Afil. inactiva',fmt:'int' },
+      { key:'noAfiliacion',label:'No afiliación', fmt:'int' }
+    ]
+  },
+
+  'debito-inmediato': {
+    cards: [
+      { key:'total',     label:'Emitidas',     type:'int', cls:'primary', ico:'📤' },
+      { key:'aprob',     label:'Aprobadas',    type:'int', cls:'success', ico:'✔' },
+      { key:'rech',      label:'Rechazadas',   type:'int', cls:'danger',  ico:'✖' },
+      { key:'tasaAprob', label:'Tasa Aprob.',  type:'pct', cls:'purple',  ico:'🎯' },
+      { agg:'rechTec',   label:'Rech. técnicos',type:'int',cls:'danger',  ico:'⚠' },
+      { agg:'timeout',   label:'Timeout',      type:'int', cls:'danger',  ico:'⏱' },
+      { agg:'saldoIns',  label:'Saldo insuf.', type:'int', cls:'warning', ico:'💰' },
+      { agg:'otpInc',    label:'OTP incorrecto',type:'int',cls:'warning', ico:'🔢' }
+    ],
+    charts: [
+      { type:'area', field:'tasaAprob', scale:100, color:'#4099ff', title:'Tasa de aprobación diaria (%)' },
+      { type:'bar',  field:'rech',                  color:'#ff5370', title:'Operaciones rechazadas' }
+    ],
+    columns: [
+      { key:'fecha',       label:'Fecha' },
+      { key:'emitidas',    label:'Emitidas',      fmt:'int' },
+      { key:'recibidas',   label:'Recibidas',     fmt:'int' },
+      { key:'aprob',       label:'Aprobadas',     fmt:'int' },
+      { key:'rech',        label:'Rechazadas',    fmt:'int' },
+      { key:'tasaAprob',   label:'Tasa Aprob.',   fmt:'pct' },
+      { key:'rechTec',     label:'Rech. técnicos',fmt:'int' },
+      { key:'cuentaCerrada',label:'Cuenta cerrada',fmt:'int' },
+      { key:'datosNo',     label:'Datos no coinc.',fmt:'int' },
+      { key:'idIncorrecto',label:'ID incorrecto', fmt:'int' },
+      { key:'sinDesc',     label:'Sin descripción',fmt:'int' },
+      { key:'timeout',     label:'Timeout',       fmt:'int' },
+      { key:'montoExcede', label:'Monto excede',  fmt:'int' },
+      { key:'saldoIns',    label:'Saldo insuf.',  fmt:'int' },
+      { key:'afilInact',   label:'Afil. inactiva',fmt:'int' },
+      { key:'otpInc',      label:'OTP incorrecto',fmt:'int' },
+      { key:'codSubprod',  label:'Cód. subprod.', fmt:'int' },
+      { key:'codBancoNo',  label:'Cód. banco inex.',fmt:'int' }
+    ]
+  }
+};
+
+/* ============================================================
+   15. BOOTSTRAP
+   ============================================================ */
+document.addEventListener('DOMContentLoaded', function() {
+  renderSidebar();
+  $('#btnMenu').addEventListener('click', function() {
+    $('#pcSidebar').classList.toggle('open');
+  });
+  navigateTo('dashboard');
+});
+</script>
+
+</body>
+</html>
