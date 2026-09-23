@@ -28,10 +28,10 @@
     .pc-sidebar{position:fixed;top:0;left:0;bottom:0;width:250px;
       background:linear-gradient(180deg,var(--sidebar-bg),var(--sidebar-2));
       color:#ecf0f1;overflow-y:auto;z-index:200;transition:transform .25s}
-    .pc-sidebar .brand{display:flex;align-items:center;gap:8px;padding:22px 22px 18px;
-      font-size:19px;font-weight:700;border-bottom:1px solid rgba(255,255,255,.06)}
-    .pc-sidebar .brand .logo-mark{color:var(--primary);font-size:22px}
-    .pc-sidebar .brand small{opacity:.55;font-weight:400;font-size:11.5px;margin-left:2px}
+    .pc-sidebar .brand{display:flex;flex-direction:column;gap:2px;padding:22px 22px 18px;
+      font-size:16px;font-weight:700;border-bottom:1px solid rgba(255,255,255,.06)}
+    .pc-sidebar .brand .logo-mark{color:var(--primary);font-size:20px}
+    .pc-sidebar .brand small{opacity:.55;font-weight:400;font-size:11px}
     .pc-sidebar .nav-group-title{padding:16px 22px 8px;font-size:10.5px;font-weight:700;
       text-transform:uppercase;letter-spacing:1.2px;color:#7d8a99}
     .pc-sidebar ul{list-style:none}
@@ -53,13 +53,8 @@
       background:var(--bg);border-radius:22px;padding:9px 16px}
     .pc-search input{flex:1;border:none;background:transparent;outline:none;font-size:14px;color:var(--text)}
     .pc-header-right{margin-left:auto;display:flex;align-items:center;gap:10px}
-    .icon-btn{position:relative;width:40px;height:40px;border-radius:50%;background:var(--bg);
-      font-size:16px;display:flex;align-items:center;justify-content:center}
-    .icon-btn .badge{position:absolute;top:-2px;right:-2px;background:var(--danger);color:#fff;
-      font-size:10px;font-weight:700;padding:2px 6px;border-radius:10px}
     .user-chip{display:flex;align-items:center;gap:10px;padding-left:6px}
-    .user-chip img{width:38px;height:38px;border-radius:50%;object-fit:cover}
-    .user-info{display:flex;flex-direction:column;line-height:1.2}
+    .user-info{display:flex;flex-direction:column;line-height:1.2;text-align:right}
     .user-name{font-weight:600;font-size:13px}
     .user-role{font-size:11px;color:var(--muted)}
 
@@ -69,7 +64,7 @@
     .page-header .crumb{margin-left:auto;color:var(--muted);font-size:11.5px;letter-spacing:.6px;text-transform:uppercase}
     .page-header .last-update{color:var(--muted);font-size:12px}
 
-    /* ============ FILTER BAR ============ */
+    /* FILTER BAR */
     .filter-bar{background:#fff;border-radius:var(--radius);box-shadow:var(--shadow);
       padding:14px 20px;margin-bottom:20px;display:flex;flex-wrap:wrap;align-items:center;gap:12px}
     .filter-bar-label{font-size:11.5px;font-weight:700;color:var(--muted);
@@ -95,7 +90,7 @@
     .filter-badge{display:inline-block;padding:3px 10px;background:#e6f0ff;color:var(--primary);
       border-radius:10px;font-size:11px;font-weight:700;margin-left:4px}
 
-    /* ============ KPI cards ============ */
+    /* KPI cards */
     .kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:16px;margin-bottom:20px}
     .kpi{background:#fff;border-radius:var(--radius);box-shadow:var(--shadow);padding:18px 20px;
       display:flex;flex-direction:column;gap:4px;position:relative;overflow:hidden}
@@ -113,7 +108,7 @@
     .chart-card{background:#fff;border-radius:var(--radius);box-shadow:var(--shadow);
       padding:20px;display:flex;flex-direction:column}
     .chart-card h3{font-size:14px;font-weight:600;margin-bottom:10px}
-    .chart-wrap{position:relative;width:100%;height:260px}
+    .chart-wrap{position:relative;width:100%;height:280px}
 
     /* Table */
     .table-card{background:#fff;border-radius:var(--radius);box-shadow:var(--shadow);padding:20px;margin-bottom:20px}
@@ -134,14 +129,13 @@
     @keyframes spin{to{transform:rotate(360deg)}}
     .err{color:var(--danger);padding:20px;font-weight:600}
 
-    /* Empty state */
     .filter-empty{background:#fff;border-radius:var(--radius);box-shadow:var(--shadow);
       padding:60px 20px;text-align:center;color:var(--muted)}
     .filter-empty .ico{font-size:44px;opacity:.35;margin-bottom:12px}
     .filter-empty p{font-size:14px;margin-bottom:6px}
     .filter-empty small{font-size:12px;opacity:.75}
 
-    /* Dashboard cards */
+    /* Dashboard */
     .dash-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:20px}
     .dash-card{background:#fff;border-radius:var(--radius);box-shadow:var(--shadow);
       padding:22px;display:flex;flex-direction:column;gap:8px;cursor:pointer;
@@ -181,7 +175,8 @@
 <!-- ============ SIDEBAR ============ -->
 <aside class="pc-sidebar" id="pcSidebar">
   <div class="brand">
-    <span class="logo-mark">✦</span> <b>Monitoreo de Servcios TI</b><small> Gerencia de Continuidad y Cumplimiento</small>
+    <span><span class="logo-mark">✦</span> Monitoreo de Servicios TI</span>
+    <small>Gerencia de Continuidad y Cumplimiento</small>
   </div>
   <nav id="navContainer"></nav>
 </aside>
@@ -234,7 +229,6 @@ const NAV = [
   { id:'est-trimestrales',   label:'Estadística Mensual', icon:'🗓', group:'Reportes', title:'Estadística Mensual',    crumb:'INICIO / REPORTES / MENSUAL' }
 ];
 
-/* Páginas que admiten filtro temporal */
 const FILTERED_PAGES = new Set([
   'pos-propios','pos-otros','p2p','transferencias','credito-inmediato','debito-inmediato'
 ]);
@@ -249,7 +243,6 @@ const fmtPct = n => ((n||0)*100).toFixed(2)+'%';
 const fmtNum = (n, d) => (n||0).toFixed(d===undefined?2:d);
 const esc = s => String(s||'').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 
-/* Convierte 'dd/MM' (asumimos 2026) a Date */
 function toDateObj(fecha) {
   const m = String(fecha || '').match(/^(\d{1,2})\/(\d{1,2})$/);
   if (!m) return null;
@@ -260,16 +253,18 @@ function toDateObj(fecha) {
    3. ESTADO GLOBAL
    ============================================================ */
 let CURRENT_PAGE = 'dashboard';
-let RAW_DATA = null;   // { rows, kpi } de la página actual
-let areaChartRef = null;
-let barChartRef = null;
+let RAW_DATA = null;
+let chartRefs = [];   // ⬅ ahora es un array para soportar varios gráficos
 
 const FILTER_STATE = {
-  type: 'all',    // 'all' | 'day' | 'month' | 'quarter'
-  day: '',        // 'YYYY-MM-DD'
-  month: '',      // 'YYYY-MM'
-  quarter: ''     // 'YYYY-Q'
+  type: 'all', day: '', month: '', quarter: ''
 };
+
+/* Destruye todos los charts vivos */
+function destroyAllCharts() {
+  chartRefs.forEach(c => { try { c.destroy(); } catch(e){} });
+  chartRefs = [];
+}
 
 /* ============================================================
    4. RENDER SIDEBAR
@@ -307,14 +302,12 @@ function renderSidebar() {
    ============================================================ */
 function navigateTo(pageId) {
   CURRENT_PAGE = pageId;
-  // Resetear filtros al cambiar de página
   FILTER_STATE.type = 'all';
   FILTER_STATE.day = '';
   FILTER_STATE.month = '';
   FILTER_STATE.quarter = '';
   RAW_DATA = null;
-  areaChartRef = null;
-  barChartRef = null;
+  destroyAllCharts();
 
   $$('#navContainer li').forEach(li => {
     li.classList.toggle('active', li.dataset.page === pageId);
@@ -324,13 +317,14 @@ function navigateTo(pageId) {
 }
 
 /* ============================================================
-   6. RENDER DE PÁGINA (carga datos)
+   6. RENDER DE PÁGINA
    ============================================================ */
 function renderPage(pageId) {
   const meta = NAV.find(n => n.id === pageId) || NAV[0];
   $('#pageTitle').textContent = meta.title;
   $('#pageCrumb').textContent = meta.crumb;
-  $('#filterBarContainer').innerHTML = '';   // limpia filtros previos
+  $('#filterBarContainer').innerHTML = '';
+  destroyAllCharts();
   $('#viewContainer').innerHTML = `<div class="loader"><div class="spinner"></div><p>Cargando…</p></div>`;
 
   if (pageId === 'dashboard') {
@@ -351,7 +345,7 @@ function renderError(err) {
 }
 
 /* ============================================================
-   7. VISTA DASHBOARD (sin filtros)
+   7. DASHBOARD
    ============================================================ */
 function renderDashboard(resp) {
   if (!resp.ok) { renderError({ message: resp.error }); return; }
@@ -387,122 +381,96 @@ function renderDashboard(resp) {
   });
 
   const labels = (d.posRows || []).map(r => r.fecha);
-  const data = (d.posRows || []).map(r => +(r.tasaAprob * 100).toFixed(2));
+  const data   = (d.posRows || []).map(r => +(r.tasaAprob * 100).toFixed(2));
   if (labels.length) {
-    new Chart($('#chartGlobal'), {
-      type: 'line',
+    const chart = new Chart($('#chartGlobal'), {
+      type: 'bar',                             // ⬅ antes era 'line'
       data: { labels, datasets: [{
-        data, borderColor:'#4099ff',
-        backgroundColor: 'rgba(64,153,255,0.15)',
-        fill:true, tension:.35, pointRadius:2, borderWidth:2
+        data,
+        backgroundColor: '#4099ff',
+        borderRadius: 4
       }]},
-      options: { responsive:true, maintainAspectRatio:false,
-        plugins:{legend:{display:false}},
+      options: {
+        responsive:true, maintainAspectRatio:false,
+        plugins:{legend:{display:false},
+          tooltip:{callbacks:{label: ctx => ctx.parsed.y.toFixed(2)+'%'}}},
         scales:{
-          y:{beginAtZero:true, grid:{color:'#eef1f7'}, ticks:{color:'#9aa0ac'}},
-          x:{grid:{display:false}, ticks:{color:'#9aa0ac'}}
+          y:{ beginAtZero:true, max:100, grid:{color:'#eef1f7'}, ticks:{color:'#9aa0ac',
+              callback: v => v + '%' }},
+          x:{ grid:{display:false}, ticks:{color:'#9aa0ac'} }
         }
       }
     });
+    chartRefs.push(chart);
   }
   $('#lastUpdate').textContent = 'Actualizado: ' + new Date().toLocaleTimeString('es-VE');
 }
 
 /* ============================================================
-   8. VISTA GENÉRICA (con filtros)
+   8. VISTA GENÉRICA
    ============================================================ */
 function renderGeneric(pageId, resp) {
   if (!resp.ok) { renderError({ message: resp.error }); return; }
-
   if (pageId === 'estadistica-diaria') { renderEstDiaria(resp.data); return; }
   if (pageId === 'est-semanales')      { renderEstSemanal(resp.data); return; }
   if (pageId === 'est-trimestrales')   { renderEstTrimestral(resp.data); return; }
 
-  // Guardamos datos crudos
   RAW_DATA = resp.data;
-
-  // Pinta barra de filtros y cuerpo
   renderFilterBar();
   renderGenericBody();
 }
 
 /* ============================================================
-   9. BARRA DE FILTROS
+   9. FILTROS
    ============================================================ */
 function renderFilterBar() {
   const cont = $('#filterBarContainer');
-
-  if (!FILTERED_PAGES.has(CURRENT_PAGE)) {
-    cont.innerHTML = '';
-    return;
-  }
+  if (!FILTERED_PAGES.has(CURRENT_PAGE)) { cont.innerHTML = ''; return; }
 
   const f = FILTER_STATE;
   const hasFilter = f.type !== 'all';
-
-  // Conteo tras aplicar filtro
   const totalDias = RAW_DATA && RAW_DATA.rows ? RAW_DATA.rows.length : 0;
   const visibles  = RAW_DATA ? applyFilter(RAW_DATA.rows).length : 0;
 
   cont.innerHTML = `
     <div class="filter-bar">
       <span class="filter-bar-label">🔎 Filtrar:</span>
-
       <div class="filter-segment">
         <button data-type="all"     class="${f.type==='all'?'active':''}">Todo</button>
         <button data-type="day"     class="${f.type==='day'?'active':''}">Día</button>
         <button data-type="month"   class="${f.type==='month'?'active':''}">Mes</button>
         <button data-type="quarter" class="${f.type==='quarter'?'active':''}">Trimestre</button>
       </div>
-
-      <div class="filter-inputs" id="filterInputs">
-        ${renderFilterInputsHTML()}
-      </div>
-
+      <div class="filter-inputs" id="filterInputs">${renderFilterInputsHTML()}</div>
       ${hasFilter ? `<span class="filter-badge">${visibles} / ${totalDias} días</span>` : ''}
-
-      <button class="btn-clear" id="btnClearFilter" ${hasFilter?'':'disabled'}>
-        🗑 Limpiar
-      </button>
+      <button class="btn-clear" id="btnClearFilter" ${hasFilter?'':'disabled'}>🗑 Limpiar</button>
     </div>
   `;
 
-  // Segment buttons
   cont.querySelectorAll('.filter-segment button').forEach(b => {
     b.addEventListener('click', () => {
       FILTER_STATE.type = b.dataset.type;
-      if (b.dataset.type === 'day' && !FILTER_STATE.day) {
-        FILTER_STATE.day = '2026-09-01';
-      }
-      if (b.dataset.type === 'month' && !FILTER_STATE.month) {
-        FILTER_STATE.month = '2026-09';
-      }
-      if (b.dataset.type === 'quarter' && !FILTER_STATE.quarter) {
-        FILTER_STATE.quarter = '2026-Q3';
-      }
+      if (b.dataset.type === 'day' && !FILTER_STATE.day)       FILTER_STATE.day = '2026-09-01';
+      if (b.dataset.type === 'month' && !FILTER_STATE.month)   FILTER_STATE.month = '2026-09';
+      if (b.dataset.type === 'quarter' && !FILTER_STATE.quarter) FILTER_STATE.quarter = '2026-Q3';
       renderFilterBar();
       renderGenericBody();
     });
   });
 
-  // Clear button
   const clr = $('#btnClearFilter');
   if (clr) clr.addEventListener('click', clearFilter);
-
-  // Inputs
   wireFilterInputs();
 }
 
 function renderFilterInputsHTML() {
   const f = FILTER_STATE;
   if (f.type === 'day') {
-    return `<input type="date" id="filterDayInput"
-      value="${f.day || '2026-09-01'}"
+    return `<input type="date" id="filterDayInput" value="${f.day || '2026-09-01'}"
       min="2026-09-01" max="2026-09-30">`;
   }
   if (f.type === 'month') {
-    return `<input type="month" id="filterMonthInput"
-      value="${f.month || '2026-09'}"
+    return `<input type="month" id="filterMonthInput" value="${f.month || '2026-09'}"
       min="2026-01" max="2026-12">`;
   }
   if (f.type === 'quarter') {
@@ -524,34 +492,18 @@ function renderFilterInputsHTML() {
 
 function wireFilterInputs() {
   const f = FILTER_STATE;
-
   const d = $('#filterDayInput');
-  if (d) d.addEventListener('change', () => {
-    f.day = d.value;
-    refreshFilterAndBody();
-  });
-
+  if (d) d.addEventListener('change', () => { f.day = d.value; refreshFilterAndBody(); });
   const m = $('#filterMonthInput');
-  if (m) m.addEventListener('change', () => {
-    f.month = m.value;
-    refreshFilterAndBody();
-  });
-
+  if (m) m.addEventListener('change', () => { f.month = m.value; refreshFilterAndBody(); });
   const qy = $('#filterQuarterYear');
   const qq = $('#filterQuarterQ');
-  const updQ = () => {
-    if (qy && qq) {
-      f.quarter = qy.value + '-Q' + qq.value;
-      refreshFilterAndBody();
-    }
-  };
+  const updQ = () => { if (qy && qq) { f.quarter = qy.value + '-Q' + qq.value; refreshFilterAndBody(); } };
   if (qy) qy.addEventListener('change', updQ);
   if (qq) qq.addEventListener('change', updQ);
 }
 
-/* Refresca solo el body (sin tocar los inputs) */
 function refreshFilterAndBody() {
-  // Actualiza el badge (contador) sin re-renderizar el filtro completo
   const cont = $('#filterBarContainer');
   if (cont) {
     const badge = cont.querySelector('.filter-badge');
@@ -561,7 +513,6 @@ function refreshFilterAndBody() {
     if (hasFilter && badge) {
       badge.textContent = `${visibles} / ${totalDias} días`;
     } else if (hasFilter && !badge) {
-      // Insertar badge después de .filter-inputs
       const inputs = cont.querySelector('#filterInputs');
       if (inputs) {
         const sp = document.createElement('span');
@@ -570,7 +521,6 @@ function refreshFilterAndBody() {
         inputs.insertAdjacentElement('afterend', sp);
       }
     }
-    // Habilitar botón clear
     const clr = $('#btnClearFilter');
     if (clr) clr.disabled = !hasFilter;
   }
@@ -599,7 +549,6 @@ function applyFilter(rows) {
     const target = `${dd}/${mm}`;
     return rows.filter(r => r.fecha === target);
   }
-
   if (f.type === 'month' && f.month) {
     const [yy, mm] = f.month.split('-');
     return rows.filter(r => {
@@ -607,7 +556,6 @@ function applyFilter(rows) {
       return d && d.getFullYear() === Number(yy) && (d.getMonth() + 1) === Number(mm);
     });
   }
-
   if (f.type === 'quarter' && f.quarter) {
     const [yy, qq] = f.quarter.split('-Q');
     const qi = Number(qq);
@@ -624,7 +572,7 @@ function applyFilter(rows) {
 }
 
 /* ============================================================
-   11. RECALCULAR KPIs SOBRE FILAS FILTRADAS
+   11. RECALCULAR KPIs
    ============================================================ */
 function recalcKpi(rows, original) {
   const base = Object.assign({}, original || {});
@@ -641,7 +589,6 @@ function recalcKpi(rows, original) {
     tasaAprob: total ? aprob/total : 0,
     tasaRech:  total ? rech/total  : 0
   });
-  // P2P extras
   if (rows[0].sofnet !== undefined) {
     base.sofnet   = sum('sofnet');
     base.appMovil = sum('appMovil');
@@ -663,11 +610,9 @@ function renderGenericBody() {
   const rows = applyFilter(RAW_DATA.rows || []);
   const kpi  = recalcKpi(rows, RAW_DATA.kpi);
 
-  // Destruir gráficos previos
-  if (areaChartRef) { areaChartRef.destroy(); areaChartRef = null; }
-  if (barChartRef)  { barChartRef.destroy();  barChartRef  = null; }
+  // Destruir todos los gráficos previos
+  destroyAllCharts();
 
-  // Empty state
   if (!rows.length) {
     $('#viewContainer').innerHTML = `
       <div class="filter-empty">
@@ -730,57 +675,61 @@ function renderGenericBody() {
 
   $('#viewContainer').innerHTML = kpiHtml + chartHtml + tableHtml;
 
-  // Gráficos
+  // Crear gráficos (todos en barras)
   const labels = rows.map(r => r.fecha);
   cfg.charts.forEach((ch, i) => {
     const canvas = document.getElementById('chart' + (i+1));
     if (!canvas) return;
+
     const data = rows.map(r => {
       let v = Number(r[ch.field]) || 0;
       if (ch.scale) v *= ch.scale;
       return +v.toFixed(2);
     });
     const color = ch.color || '#4099ff';
+    const isPercent = ch.scale === 100;
 
-    if (ch.type === 'bar') {
-      barChartRef = new Chart(canvas, {
-        type:'bar',
-        data:{ labels, datasets:[{ data, backgroundColor:color, borderRadius:4 }]},
-        options:{ responsive:true, maintainAspectRatio:false,
-          plugins:{legend:{display:false}},
-          scales:{
-            y:{beginAtZero:true, grid:{color:'#eef1f7'}, ticks:{color:'#9aa0ac'}},
-            x:{grid:{display:false}, ticks:{color:'#9aa0ac'}}
-          }
+    const yScale = {
+      beginAtZero: true,
+      grid: { color:'#eef1f7' },
+      ticks: {
+        color:'#9aa0ac',
+        callback: isPercent ? (v => v + '%') : undefined
+      }
+    };
+    if (isPercent) yScale.max = 100;
+
+    const chart = new Chart(canvas, {
+      type: 'bar',                        // ⬅ SIEMPRE barras
+      data: { labels, datasets: [{
+        data,
+        backgroundColor: color,
+        borderRadius: 4
+      }]},
+      options: {
+        responsive:true, maintainAspectRatio:false,
+        plugins:{
+          legend:{display:false},
+          tooltip:{ callbacks: {
+            label: ctx => isPercent
+              ? ctx.parsed.y.toFixed(2) + '%'
+              : ctx.parsed.y.toLocaleString('es-VE')
+          }}
+        },
+        scales:{
+          y: yScale,
+          x: { grid:{display:false}, ticks:{color:'#9aa0ac'} }
         }
-      });
-    } else {
-      const ctx = canvas.getContext('2d');
-      const grad = ctx.createLinearGradient(0,0,0,260);
-      grad.addColorStop(0, color+'66');
-      grad.addColorStop(1, color+'05');
-      areaChartRef = new Chart(canvas, {
-        type:'line',
-        data:{ labels, datasets:[{
-          data, borderColor:color, backgroundColor:grad, fill:true,
-          tension:.35, pointRadius:2, borderWidth:2
-        }]},
-        options:{ responsive:true, maintainAspectRatio:false,
-          plugins:{legend:{display:false}},
-          scales:{
-            y:{beginAtZero:true, grid:{color:'#eef1f7'}, ticks:{color:'#9aa0ac'}},
-            x:{grid:{display:false}, ticks:{color:'#9aa0ac'}}
-          }
-        }
-      });
-    }
+      }
+    });
+    chartRefs.push(chart);
   });
 
   $('#lastUpdate').textContent = 'Actualizado: ' + new Date().toLocaleTimeString('es-VE');
 }
 
 /* ============================================================
-   13. VISTAS DE REPORTES (sin filtros)
+   13. REPORTES
    ============================================================ */
 function renderEstDiaria(d) {
   const rows = d.rows || [];
@@ -846,7 +795,7 @@ function renderEstTrimestral(d) {
 }
 
 /* ============================================================
-   14. CONFIGURACIÓN DE PÁGINAS
+   14. CONFIGURACIÓN DE PÁGINAS — todas las tasas en 'bar'
    ============================================================ */
 const PAGES_CFG = {
   'pos-propios': {
@@ -861,8 +810,8 @@ const PAGES_CFG = {
       { agg:'timeout',   label:'Time Out',      type:'int', cls:'danger',  ico:'⏱' }
     ],
     charts: [
-      { type:'area', field:'tasaAprob', scale:100, color:'#4099ff', title:'Tasa de aprobación diaria (%)' },
-      { type:'bar',  field:'rech',                  color:'#ff5370', title:'Operaciones rechazadas' }
+      { type:'bar', field:'tasaAprob', scale:100, color:'#4099ff', title:'Tasa de aprobación diaria (%)' },
+      { type:'bar', field:'rech',                  color:'#ff5370', title:'Operaciones rechazadas' }
     ],
     columns: [
       { key:'fecha',    label:'Fecha' },
@@ -892,8 +841,8 @@ const PAGES_CFG = {
       { agg:'emisor',    label:'Emisor no disp.',type:'int',cls:'danger',ico:'📡' }
     ],
     charts: [
-      { type:'area', field:'tasaAprob', scale:100, color:'#4099ff', title:'Tasa de aprobación diaria (%)' },
-      { type:'bar',  field:'rech',                  color:'#ff5370', title:'Operaciones rechazadas' }
+      { type:'bar', field:'tasaAprob', scale:100, color:'#4099ff', title:'Tasa de aprobación diaria (%)' },
+      { type:'bar', field:'rech',                  color:'#ff5370', title:'Operaciones rechazadas' }
     ],
     columns: [
       { key:'fecha',    label:'Fecha' },
@@ -923,8 +872,8 @@ const PAGES_CFG = {
       { agg:'appMovil',  label:'App Móvil ops', type:'int', cls:'primary', ico:'📱' }
     ],
     charts: [
-      { type:'area', field:'tasaAprob', scale:100, color:'#4099ff', title:'Tasa de aprobación diaria (%)' },
-      { type:'bar',  field:'rech',                  color:'#ff5370', title:'Operaciones rechazadas' }
+      { type:'bar', field:'tasaAprob', scale:100, color:'#4099ff', title:'Tasa de aprobación diaria (%)' },
+      { type:'bar', field:'rech',                  color:'#ff5370', title:'Operaciones rechazadas' }
     ],
     columns: [
       { key:'fecha',     label:'Fecha' },
@@ -957,8 +906,8 @@ const PAGES_CFG = {
       { agg:'sinDesc',   label:'Sin descripción',type:'int',cls:'warning',ico:'❓' }
     ],
     charts: [
-      { type:'area', field:'tasaAprob', scale:100, color:'#4099ff', title:'Tasa de aprobación diaria (%)' },
-      { type:'bar',  field:'rech',                  color:'#ff5370', title:'Transferencias rechazadas' }
+      { type:'bar', field:'tasaAprob', scale:100, color:'#4099ff', title:'Tasa de aprobación diaria (%)' },
+      { type:'bar', field:'rech',                  color:'#ff5370', title:'Transferencias rechazadas' }
     ],
     columns: [
       { key:'fecha',       label:'Fecha' },
@@ -992,8 +941,8 @@ const PAGES_CFG = {
       { agg:'noAfiliacion',label:'No afiliación',type:'int',cls:'warning', ico:'🚫' }
     ],
     charts: [
-      { type:'area', field:'tasaAprob', scale:100, color:'#4099ff', title:'Tasa de aprobación diaria (%)' },
-      { type:'bar',  field:'rech',                  color:'#ff5370', title:'Operaciones rechazadas' }
+      { type:'bar', field:'tasaAprob', scale:100, color:'#4099ff', title:'Tasa de aprobación diaria (%)' },
+      { type:'bar', field:'rech',                  color:'#ff5370', title:'Operaciones rechazadas' }
     ],
     columns: [
       { key:'fecha',       label:'Fecha' },
@@ -1028,8 +977,8 @@ const PAGES_CFG = {
       { agg:'otpInc',    label:'OTP incorrecto',type:'int',cls:'warning', ico:'🔢' }
     ],
     charts: [
-      { type:'area', field:'tasaAprob', scale:100, color:'#4099ff', title:'Tasa de aprobación diaria (%)' },
-      { type:'bar',  field:'rech',                  color:'#ff5370', title:'Operaciones rechazadas' }
+      { type:'bar', field:'tasaAprob', scale:100, color:'#4099ff', title:'Tasa de aprobación diaria (%)' },
+      { type:'bar', field:'rech',                  color:'#ff5370', title:'Operaciones rechazadas' }
     ],
     columns: [
       { key:'fecha',       label:'Fecha' },
